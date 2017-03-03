@@ -1,0 +1,32 @@
+Package: ocrerrors
+Type: Package
+Title: Find Optical Character Recognition Errors and Corrections
+Version: 0.1.0
+Authors@R: person("Jacob", "Malcom", email = "jmalcom@defenders.org",
+    role = c("aut", "cre"))
+URL: https://github.com/jacob-ogre/ocrerrors
+BugReports: https://github.com/jacob-ogre/ocrerrors/issues
+Description: Optical Character Recognition (OCR) works well when the input file
+    is a clean, high-resolution image/document. But many documents exist in
+    digital form only as (often old) low-resolution or "messy" PDFs/images. Pre-
+    processing images can help improve OCR accuracy, but oftentimes those steps
+    are of limited utility. Post-processing an OCR document can substantially
+    improve accuracy, and this processing can be informed by determining the
+    distribution of word frequencies in a corpus and by identifying common
+    errors. This package contains a set of tools for getting the distributions
+    of n-grams from a 'gold standard' set of input PDFs with a text layer;
+    simulating low-quality image-based PDFs from the gold set; and identifying
+    errors that arise from OCR of the low-quality, image-based PDFs.
+License: BSD_2_clause + file LICENSE
+LazyData: TRUE
+Imports:
+    dplyr,
+    ngram,
+    pdftools,
+    pdftext,
+    quanteda,
+    stringdist,
+    tm,
+    tokenizers
+Remotes: jacob-ogre/pdftext
+RoxygenNote: 5.0.1
