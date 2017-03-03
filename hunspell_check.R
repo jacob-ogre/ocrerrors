@@ -5,6 +5,7 @@ fils <- list.files("ESAdocs_on_GCE", full.names = TRUE, recursive = TRUE)
 huns <- parallel::mclapply(
   fils,
   hunspell_errors,
+  save = FALSE,
   mc.preschedule = FALSE,
   mc.cores = 14
 )

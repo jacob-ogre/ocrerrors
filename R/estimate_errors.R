@@ -14,7 +14,13 @@
 #' @export
 hunspell_errors <- function(f, save = TRUE) {
   txt <- try(paste(pdftools::pdf_text(f), collapse = " "), silent = TRUE)
-  if(class(txt) == "try-error") return(NULL)
+  if(class(txt) == "try-error") {
+    res <- dplyr::data_frame(file = f,
+                             n_word = NA,
+                             n_uniq = NA,
+                             n_miss = NA,
+                             missed = NA)
+  }
   txt <- gsub(txt, pattern = "\n", replacement = " ")
   unigram <- tokenizers::tokenize_words(txt)[[1]]
   uniq <- unique(unigram)
