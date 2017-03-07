@@ -15,7 +15,7 @@ load("~/Downloads/remaining_ML_01Mar2017.rda")
 ML <- all_res
 rm(all_res)
 
-huns <- readRDS("~/Downloads/huns_df.rds")
+huns <- readRDS("~/Downloads/huns_2017-03-07.rds")
 
 names(ML)
 na_ML <- filter(ML, is.na(count))
@@ -27,12 +27,10 @@ ML_uniq <- unique(ML$entity)
 ML_u_tok <- unlist(tokenize_words(ML_uniq))
 ML_uniq <- unique(ML_u_tok)
 
-no_ner <- lapply(seq_along(tt), function(x) tt[[x]][!(tt[[x]] %in% ML_uniq)])
-
 no_ner <- parallel::mclapply(
   seq_along(huns$missed),
   function(x) huns$missed[[x]][!(huns$missed[[x]] %in% ML_uniq)],
-  mc.preschedule = FALSE,
+  mc.preschedule = TRUE,
   mc.cores = 3
 )
 huns$no_ner <- no_ner
@@ -67,6 +65,12 @@ huns$pct_bad_ner <- huns$n_bad_filt / huns$n_uniq
 huns$pct_bad_spp <- huns$n_no_spp / huns$n_uniq
 huns$pct_bad_mis <- huns$n_no_misc / huns$n_uniq
 
+summary(huns$pct_bad_ori)
+summary(huns$pct_bad_ner)
+summary(huns$pct_bad_spp)
+summary(huns$pct_bad_mis)
+
+
 saveRDS(huns, "~/Downloads/ESAdocs_misspell.rds")
 saveRDS(no_spp, "~/Downloads/ESAdocs_post_spp_list.rds")
 saveRDS(no_misc, "~/Downloads/ESAdocs_post_misc_list.rds")
@@ -77,22 +81,61 @@ saveRDS(no_misc, "~/Downloads/ESAdocs_post_misc_list.rds")
 
 COLS <- substr(viridis(7), 1, 7)
 
-ggplot(data = huns, aes(x = (100 * pct_bad_ori))) +
-  geom_density(alpha = 0.8, fill = COLS[1], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_ner), alpha = 0.8, fill = COLS[3], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_spp), alpha = 0.6, fill = COLS[5], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_mis), alpha = 0.6, fill = COLS[7], color = NA) +
-  # xlim(0, 66) +
-  labs(x = "Word error rate (percent)") +
+pcts <- data_frame(
+  pctg = c(100 * huns$pct_bad_ori,
+           100 * huns$pct_bad_ner,
+           100 * huns$pct_bad_spp,
+           100 * huns$pct_bad_mis),
+  type = c(rep("Hunspell", length(huns$pct_bad_ori)),
+           rep("+NER", length(huns$pct_bad_ner)),
+           rep("+ITIS", length(huns$pct_bad_spp)),
+           rep("+Misc.", length(huns$pct_bad_mis)))
+)
+
+ggplot(data = pcts, aes(x = pctg, fill = type)) +
+  geom_density(color = NA) +
+  scale_fill_viridis(4, alpha = 0.5, discrete = TRUE,
+                     guide = guide_legend(title = "word filter"),
+                     breaks = c("Hunspell",
+                                "+NER",
+                                "+ITIS",
+                                "+Misc.")) +
+  labs(x = "Percent word error") +
   theme_hc()
 
-ggplot(data = huns, aes(x = (100 * pct_bad_ori))) +
-  geom_density(alpha = 0.8, fill = COLS[1], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_ner), alpha = 0.8, fill = COLS[3], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_spp), alpha = 0.6, fill = COLS[5], color = NA) +
-  geom_density(aes(x = 100 * pct_bad_mis), alpha = 0.6, fill = COLS[7], color = NA) +
+ggplot(data = pcts, aes(x = pctg, fill = type)) +
+  geom_density(color = NA) +
+  scale_fill_viridis(4, alpha = 0.5, discrete = TRUE,
+                     guide = guide_legend(title = "word filter"),
+                     breaks = c("Hunspell",
+                                "+NER",
+                                "+ITIS",
+                                "+Misc.")) +
   xlim(0, 20) +
-  labs(x = "Word error rate (percent)") +
+  labs(x = "Percent word error") +
+  theme_hc()
+
+
+huns$chg_ner_ori <- 100 * huns$pct_bad_ner / huns$pct_bad_ori
+huns$chg_spp_ner <- 100 * huns$pct_bad_spp / huns$pct_bad_ner
+huns$chg_spp_ori <- 100 * huns$pct_bad_spp / huns$pct_bad_ner
+huns$chg_mis_spp <- 100 * huns$pct_bad_mis / huns$pct_bad_spp
+
+chng <- data_frame(
+  change = c(huns$chg_ner_ori, huns$chg_spp_ner, huns$chg_mis_spp),
+  type = c(rep("Hunspell:NER", length(huns$chg_ner_ori)),
+           rep("NER:ITIS", length(huns$chg_spp_ner)),
+           rep("ITIS:misc.", length(huns$chg_mis_spp)))
+)
+
+ggplot(chng, aes(x = 100 - change, fill = type)) +
+  geom_density(color = NA) +
+  scale_fill_viridis(3, alpha = 0.5, discrete = TRUE,
+                     guide = guide_legend(title = "Transition"),
+                     breaks = c("Hunspell:NER",
+                                "NER:ITIS",
+                                "ITIS:misc.")) +
+  labs(x = "Percent error reduction") +
   theme_hc()
 
 ggplot(huns, aes(x = pct_bad_ori, y = pct_bad_mis)) +
@@ -101,15 +144,3 @@ ggplot(huns, aes(x = pct_bad_ori, y = pct_bad_mis)) +
 
 low_end <- filter(huns, pct_bad_ori < 0.3 & pct_bad_ner < 0.3 & pct_bad_spp < 0.3)
 
-huns$chg_ner_ori <- 100 * huns$pct_bad_ner / huns$pct_bad_ori
-huns$chg_spp_ner <- 100 * huns$pct_bad_spp / huns$pct_bad_ner
-huns$chg_spp_ori <- 100 * huns$pct_bad_spp / huns$pct_bad_ner
-
-ggplot(huns, aes(x = 100 * pct_bad_ner / pct_bad_ori)) +
-  geom_density(fill = COLS[1], colour = NA, alpha = 0.5) +
-  geom_density(aes(100 * pct_bad_spp / pct_bad_ner),
-               fill = COLS[3], colour = NA, alpha = 0.7) +
-  geom_density(aes(100 * pct_bad_mis / pct_bad_spp),
-               fill = COLS[7], colour = NA, alpha = 0.7) +
-  labs(x = "Word error improvement (percent)") +
-  theme_hc()

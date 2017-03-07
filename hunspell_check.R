@@ -10,7 +10,7 @@ huns <- parallel::mclapply(
   mc.cores = 14
 )
 huns_df <- dplyr::bind_rows(huns)
-save(huns_df, file = "/datadrive/data/ESAdocs_on_GCE/huns_df_p1.rda")
+saveRDS(huns_df, file = "/datadrive/data/ESAdocs_on_GCE/huns_2017-03-07.rds")
 
 done <- unique(huns_df$file)
 new_fils <- fils[!(fils %in% done)]
