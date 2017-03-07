@@ -24,6 +24,7 @@ hunspell_errors <- function(f, save = TRUE) {
   txt <- gsub(txt, pattern = "\n", replacement = " ")
   unigram <- tokenizers::tokenize_words(txt)[[1]]
   uniq <- unique(unigram)
+  uniq <- gsub(uniq, pattern = "[[:punct:]]", replacement = "")
   no_hun <- unlist(hunspell::hunspell(uniq))
   res <- dplyr::data_frame(
     file = f,
