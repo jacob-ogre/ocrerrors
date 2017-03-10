@@ -2,8 +2,8 @@
 #
 ############################################################################
 #
-# After a lot of work and a lot of trial-and-error, MonkeyLearn is just too
-# fragile for the task of NER with all of ESAdocs. Will instead work on a hackey
+# After a lot of work and a lot of trial-and-error, MonkeyLearn is often too
+# fragile for the task of NER with all of ESAdocs. Also worked on a hackey
 # solution that uses coreNLP...
 #
 ############################################################################
@@ -150,64 +150,4 @@ for(i in 0:n_chunks) {
 }
 
 monkey_res <- bind_rows(results)
-
-## This chunk was used to try to process the docs on a first go-around, but
-## proved to have some problems (well, probs in proc_fils). Next block down
-## uses the new proc_fils.
-# fils <- list.files("/datadrive/data/ESAdocs_on_GCE",
-#                    full.names = TRUE,
-#                    recursive = TRUE)
-# results <- list()
-# n_chunks <- length(fils) / 10
-# for(i in 0:n_chunks) {
-#   lo <- (i*10)+1
-#   hi <- (i+1)*10
-#   if(hi > length(fils)) hi <- length(fils)
-#   cur_set <- fils[lo:hi]
-#   results[[i+1]] <- proc_fils(cur_set)
-#   Sys.sleep(65)
-# }
-#
-# check_stanford_installed <- function(stanford = stansent::coreNLP_loc(),
-#                                      download = stansent::coreNLP_url(), verbose = TRUE){
-#
-#   if (isTRUE(verbose)) message("\nchecking if coreNLP is installed...\n")
-#
-#   root <- strsplit(getwd(), "(/|\\\\)+")[[1]][1]
-#   out <- file.exists(stanford)
-#
-#   if (isTRUE(out)) {
-#     mess <- paste0("Stanford coreNLP appears to be installed.\n\n",
-#                    "...Let the NLP tagging begin!\n\n")
-#     if (isTRUE(verbose)) message(mess)
-#     return(invisible(NULL))
-#   } else {
-#     mess <- "Stanford coreNLP does not appear to be installed in root.\nWould you like me to try to install it there?"
-#     message(mess)
-#
-#     ans <- utils::menu(c("Yes", "No"))
-#     if (ans == "2") {
-#       stop("Please consider installing yourself...\n\nhttp://stanfordnlp.github.io/CoreNLP")
-#     } else {
-#       message("Let me try...\nHold on.  It's large and may take some time...\n")
-#     }
-#
-#     temp <- tempdir()
-#     dest <- "~/Downloads/nlp1/stanford-corenlp-full-2016-10-31.zip"
-#     # utils::download.file(download, dest)
-#     # utils::unzip(dest, exdir = temp)
-#     stan <- gsub("\\.zip$", "", dest)
-#     if (!file.exists(stan)) stop(
-#       "I let you down :-/\nIt appears the file was not downloaded.\n",
-#       "Consider installing yourself via:\n\n",
-#       "http://nlp.stanford.edu/software/corenlp.shtml\n\n"
-#     )
-#     print(c(stan, root))
-#     file.copy(stan, file.path(root, "/"), , TRUE)
-#     if (file.exists(file.path(root, basename(stan)))) message(
-#       "I have done it...\nStanford's coreNLP appears to be installed.\n\n",
-#       "...Let the NLP tagging begin!\n\n"
-#     )
-#   }
-# }
 

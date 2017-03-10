@@ -92,9 +92,9 @@ pcts <- data_frame(
            rep("+Misc.", length(huns$pct_bad_mis)))
 )
 
-ggplot(data = pcts, aes(x = pctg, fill = type)) +
+fig_1a <- ggplot(data = pcts, aes(x = pctg, fill = type)) +
   geom_density(color = NA) +
-  scale_fill_viridis(4, alpha = 0.5, discrete = TRUE,
+  scale_fill_viridis(4, alpha = 0.7, discrete = TRUE,
                      guide = guide_legend(title = "word filter"),
                      breaks = c("Hunspell",
                                 "+NER",
@@ -102,10 +102,13 @@ ggplot(data = pcts, aes(x = pctg, fill = type)) +
                                 "+Misc.")) +
   labs(x = "Percent word error") +
   theme_hc()
+base <- "~/Google Drive/Defenders/EndSpCons_shared/ESAdocs"
+outf <- file.path(base, "Fig_1a.pdf")
+ggsave(outf, fig_1a)
 
-ggplot(data = pcts, aes(x = pctg, fill = type)) +
+fig_1b <- ggplot(data = pcts, aes(x = pctg, fill = type)) +
   geom_density(color = NA) +
-  scale_fill_viridis(4, alpha = 0.5, discrete = TRUE,
+  scale_fill_viridis(4, alpha = 0.7, discrete = TRUE,
                      guide = guide_legend(title = "word filter"),
                      breaks = c("Hunspell",
                                 "+NER",
@@ -114,7 +117,8 @@ ggplot(data = pcts, aes(x = pctg, fill = type)) +
   xlim(0, 20) +
   labs(x = "Percent word error") +
   theme_hc()
-
+outf <- file.path(base, "Fig_1b.pdf")
+ggsave(outf, fig_1b)
 
 huns$chg_ner_ori <- 100 * huns$pct_bad_ner / huns$pct_bad_ori
 huns$chg_spp_ner <- 100 * huns$pct_bad_spp / huns$pct_bad_ner
@@ -128,18 +132,22 @@ chng <- data_frame(
            rep("ITIS:misc.", length(huns$chg_mis_spp)))
 )
 
-ggplot(chng, aes(x = 100 - change, fill = type)) +
+fig_1c <- ggplot(chng, aes(x = 100 - change, fill = type)) +
   geom_density(color = NA) +
-  scale_fill_viridis(3, alpha = 0.5, discrete = TRUE,
+  scale_fill_viridis(3, alpha = 0.7, discrete = TRUE,
                      guide = guide_legend(title = "Transition"),
                      breaks = c("Hunspell:NER",
                                 "NER:ITIS",
                                 "ITIS:misc.")) +
   labs(x = "Percent error reduction") +
   theme_hc()
+outf <- file.path(base, "Fig_1c.pdf")
+ggsave(outf, fig_1c)
 
 ggplot(huns, aes(x = pct_bad_ori, y = pct_bad_mis)) +
-  geom_point(size = 4, alpha = 0.2) +
+  geom_point(size = 4, alpha = 0.05) +
+  labs(x = "Proportion error words, Hunspell-only",
+       y = "Proportion error words, all filters") +
   theme_hc()
 
 low_end <- filter(huns, pct_bad_ori < 0.3 & pct_bad_ner < 0.3 & pct_bad_spp < 0.3)
